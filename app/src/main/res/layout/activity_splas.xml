@@ -6,25 +6,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@color/warna4"
+    android:background="@color/putih"
     tools:context=".SplasActivity">
 
     <ImageView
         android:id="@+id/iv"
-        android:layout_width="204dp"
-        android:layout_height="193dp"
+        android:layout_width="130dp"
+        android:layout_height="150dp"
         android:layout_gravity="center"
-        android:src="@drawable/ki" />
-    <TextView
-        android:id="@+id/tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Welcome.."
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="@color/putih"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"/>
-
-
+        android:src="@drawable/warna" />
 </LinearLayout>

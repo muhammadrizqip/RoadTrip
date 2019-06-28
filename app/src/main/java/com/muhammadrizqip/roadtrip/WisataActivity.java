@@ -7,21 +7,24 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +37,14 @@ public class WisataActivity extends AppCompatActivity {
     ProgressDialog pb;
     String pwisata, pbiaya,pid;
 
+    private TextView alamat, tvDestLocation;
+    private TextView tvPickUpAddr, tvPickUpLatLng, tvPickUpName;
+    private TextView tvDestLocAddr, tvDestLocLatLng, tvDestLocName;
+
+    public static final int pickup = 0;
+    public static final  int dest = 1;
+    private  static int request = 0;
+
     FirebaseFirestore db ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +53,27 @@ public class WisataActivity extends AppCompatActivity {
 
         final ActionBar actionBar = getSupportActionBar();
         //actionBar.setTitle("Tambah Data Wisata");
+        // inisialisasi metod wigetinit
+        wigetInit();
+        // event onclick untuk text view alamat
+        alamat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // jalankan metod untuk menampilkan place auto complete
+                tampilPlaceAutoComplete(pickup);
+            }
+        });
+
+        tvDestLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // jalankan metod untuk menampilkan place auto complete
+                tampilPlaceAutoComplete(dest);
+            }
+        });
+
+
+
 
         wisataet = findViewById(R.id.wisataet);
         fasilitaset= findViewById(R.id.fasilitaset);
@@ -92,6 +124,7 @@ public class WisataActivity extends AppCompatActivity {
                     String wisata = wisataet.getText().toString().trim();
                     int biaya = Integer.parseInt(biayaet.getText().toString().trim());
                     String fasilitas = fasilitaset.getText().toString().trim();
+                    String latlangg = latitudeet.getText().toString().trim();
                     simpan(wisata,biaya,fasilitas);
                 }
             }
@@ -104,6 +137,77 @@ public class WisataActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private void wigetInit() {
+        alamat = findViewById(R.id.alamat);
+        tvDestLocation = findViewById(R.id.tvDestLocation);
+        tvPickUpAddr = findViewById(R.id.tvPickUpAddr);
+        tvPickUpLatLng = findViewById(R.id.tvPickUpLatLng);
+        tvPickUpName = findViewById(R.id.tvPickUpName);
+        tvDestLocAddr = findViewById(R.id.tvDestLocAddr);
+        tvDestLocLatLng = findViewById(R.id.tvDestLocLatLng);
+        tvDestLocName = findViewById(R.id.tvDestLocName);
+    }
+    //method untuk menampilkan input place auto complete
+    private void tampilPlaceAutoComplete(int typeLocation){
+        // isi RESUT_CODE tergantung tipe lokasi yg dipilih.
+        // titik jmput atau tujuan
+        request = typeLocation;
+
+        // Filter hanya tmpat yg ada di Indonesia
+        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder().setCountry("ID").build();
+        try {
+            Intent mIntent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                    .setFilter(typeFilter)
+                    .build(this);
+            // jalankan intent impilist
+            startActivityForResult(mIntent, request);
+        } catch (GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Layanan Tidak Tersedia", Toast.LENGTH_SHORT).show();
+        } catch (GooglePlayServicesRepairableException e) {
+            e.printStackTrace();
+        }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // pastkan Resultnya Okk
+        if (resultCode == RESULT_OK){
+            // TAMPUNG DATA TEMPAT KE VARIABEL
+            Place placeData = PlaceAutocomplete.getPlace(this,data);
+            if (placeData.isDataValid()){
+                // tampilkan Data di Log Cat
+                Log.d("autoCompletePlace Data", placeData.toString());
+                // dapatkan Detail data
+                String placeAddress = placeData.getAddress().toString();
+                LatLng placeLatlang = placeData.getLatLng();
+                String placeName = placeData.getName().toString();
+
+                // cek user memilih titik jemput atau titik tujuan
+                switch (request){
+                    case pickup:
+                        // set ke widget lokasi asal
+                        alamat.setText(placeAddress);
+                        tvPickUpAddr.setText("Alamat Lokasi: "+placeAddress);
+                        tvPickUpLatLng.setText("LatLang: "+placeLatlang.toString());
+                        latitudeet.setText(placeLatlang.toString());
+                        tvPickUpName.setText("Nama Tempat: "+placeName);
+                        break;
+                    case dest:
+                        alamat.setText(placeAddress);
+                        tvPickUpAddr.setText("Alamat Tujuan: "+placeAddress);
+                        tvPickUpLatLng.setText("LatLang: "+placeLatlang.toString());
+
+                        tvPickUpName.setText("Nama Tempat: "+placeName);
+                        break;
+                }
+            }else {
+                Toast.makeText(this, "invalid Place", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void updatedata(String id,int biaya, String wisata) {

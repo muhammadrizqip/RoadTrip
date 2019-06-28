@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Road Trip</string>
+    <string name="app_name">E-Trip</string>
     <string name="create_acount"><font color="#00ff00">text</font></string>
     <string name="Email">Email</string>
     <string name="Password">Password</string>

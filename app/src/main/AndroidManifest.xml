@@ -16,12 +16,13 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher2"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".teskedua"></activity>
+        <activity android:name=".PlaceAutoActivity"></activity>
+        <activity android:name=".teskedua" />
         <activity android:name=".contoh" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -33,7 +34,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
+            android:value="AIzaSyBe9P-itehQgH5BG7ox5vizpv5E1iGLMhg" />
 
         <activity
             android:name=".MapsActivity2"
